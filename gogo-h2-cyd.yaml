@@ -1,0 +1,559 @@
+---
+esphome:
+  name: "herak-gogo-h2-cyd"
+  friendly_name: "Herak Gogo H2 control"
+  comment: "Gogo H2"
+  on_boot:
+    - priority: 400
+      then:
+        - script.execute: update_loading_page
+    - priority: 800
+      then:
+        - script.execute: sw0_state_sync
+        - script.execute: sw1_state_sync
+        - script.execute: sw2_state_sync
+        - script.execute: sw3_state_sync
+        - script.execute: sw4_state_sync
+        - script.execute: sw5_state_sync
+        - script.execute: sw6_state_sync
+        - script.execute: sw7_state_sync
+
+logger:
+  level: debug
+
+packages:
+  # Generic configuration for ESP32 screens
+  # SDL has no Wi-Fi
+  wifi: !include lib/esphome-modular-lvgl-buttons/common/wifi.yaml
+  # Enable OTA updates with a status screen
+  ota_screen: !include lib/esphome-modular-lvgl-buttons/common/ota.yaml
+  # All the colors
+  colors: !include lib/esphome-modular-lvgl-buttons/common/color.yaml
+  # Some nice basic fonts
+  fonts: !include lib/esphome-modular-lvgl-buttons/common/fonts.yaml
+  # 1000s of glyphs
+  glyphs: !include lib/esphome-modular-lvgl-buttons/common/mdi_glyph_substitutions.yaml
+  # Some basic sensors
+  sensors: !include lib/esphome-modular-lvgl-buttons/sensors/sensors_base.yaml
+  # Styles + Themes
+  theme_style: !include lib/esphome-modular-lvgl-buttons/common/theme_style.yaml
+  # Use this theme for debugging
+  # theme_style: !include esphome-modular-lvgl-buttons/common/theme_style_debug.yaml
+  # Include if your touch screen has a backlight. Also sets the time from HA
+  backlight: !include lib/esphome-modular-lvgl-buttons/common/backlight_time.yaml
+
+  # Harware description file
+  hardware: !include devices/JC3248W535.yaml
+
+  # Basic boot screen with ESPHome logo and device diagnostic info
+  loading_screen: !include lib/esphome-modular-lvgl-buttons/pages/loading_480px.yaml
+  # info screen - WiFi login, IP address, MAC address etc
+  info_screen: !include lib/esphome-modular-lvgl-buttons/pages/info.yaml
+
+# Substitution variables used through the codebase
+substitutions:
+  icon_font: mdi_icons_40
+  text_font: nunito_20
+  text_color: white
+  bg_color: black
+  button_on_color: "ep_orange"
+  button_off_color: "very_dark_gray"
+  icon_on_color: "yellow"
+  icon_off_color: "gray"
+  label_on_color: "white"
+  label_off_color: "gray"
+  button_text_color: "white"
+  screen_height: 480
+  screen_width: 320
+
+  # LCD back light modes - Code in backlight_time.yaml
+  display_daytime_brightness: "100%"
+  display_nighttime_brightness: "50%"
+  display_night_hour: "0"      # Hour for night mode (0-23)
+  display_night_minute: "0"    # Minute for night mode (0-59)
+  display_backlight_timeout_always_enabled: "false"  # Set true to dim/off in all modes, not just Night
+  display_backlight_timeout_initial: "5"  # Initial backlight timeout in minutes (-1 to disable)
+
+script:
+  - id: time_update
+    then:
+      - logger.log: "Time synced (UI update skipped)"
+  - id: sw0_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_0);
+          if (id(ha_switch_0_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw1_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_1);
+          if (id(ha_switch_1_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw2_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_2);
+          if (id(ha_switch_2_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw3_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_3);
+          if (id(ha_switch_3_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw4_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_4);
+          if (id(ha_switch_4_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw5_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_5);
+          if (id(ha_switch_5_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw6_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_6);
+          if (id(ha_switch_6_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+  - id: sw7_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(ssr_button_7);
+          if (id(ha_switch_7_state).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+
+lvgl:
+  theme:
+    switch:
+      bg_color: 0x707070
+      bg_grad_color: 0x303030
+      bg_grad_dir: "VER"
+      bg_opa: "COVER"
+      border_color: 0x444444
+      border_width: 1
+      checked:
+        bg_color: 0x1d5f96
+        bg_grad_color: 0x03324A
+        bg_grad_dir: "VER"
+        bg_opa: "COVER"
+        border_color: 0x3DB9FF
+        border_width: 2
+        shadow_width: 15
+        shadow_color: 0x1d5f96
+        shadow_opa: 80%        
+      knob:
+        bg_color: 0xFFFFFF
+        bg_grad_color: 0xC0C0C0
+        bg_grad_dir: "VER"
+        bg_opa: "COVER"
+        border_color: 0x888888
+        border_width: 1
+  pages:
+    - id: main_page
+      layout: 8x6
+      styles: page_style
+      <<: !include esphome-modular-lvgl-buttons/widgets/swipe_navigation.yaml
+      widgets:
+        - container:
+            id: temperatures_1
+            <<: &cell_common
+              grid_cell_x_align: stretch
+              grid_cell_y_align: stretch
+              grid_cell_row_span: 1
+            grid_cell_row_pos: 0
+            grid_cell_column_pos: 0
+            grid_cell_column_span: 4
+            layout:
+              type: flex
+              flex_flow: column
+              flex_align_main: center
+              flex_align_cross: center            
+            widgets:
+              - label: { id: temp_label, text: "T1: --.-°C", text_font: $text_font, recolor: true }
+              - label: { id: temp_label_2, text: "T2: --.-°C", text_font: $text_font, recolor: true }
+        #- button:
+        #    id: ResetAll
+        #    grid_cell_x_align: stretch
+        #    grid_cell_y_align: stretch
+        #    grid_cell_row_pos: 7
+        #    grid_cell_column_pos: 2
+        #    grid_cell_column_span: 2
+        #    widgets:
+        #      - label: { text: "Rest All", text_font: $text_font, align: CENTER}
+        #    on_click:
+        #      - button.press: reset_all_btn
+        - switch:
+            id: ssr_button_0
+            <<: &switch_common
+              grid_cell_x_align: stretch
+              grid_cell_y_align: stretch
+              grid_cell_row_span: 1
+              grid_cell_column_span: 2
+            grid_cell_row_pos: 2
+            grid_cell_column_pos: 1
+            on_press:
+              then:
+                - switch.toggle: ssr_0
+        - label:
+            <<: &label_common
+              grid_cell_x_align: stretch
+              grid_cell_y_align: stretch
+              grid_cell_row_span: 1
+              text_font: $text_font
+              text_color: $text_color
+              align: CENTER
+              grid_cell_column_span: 1
+            grid_cell_row_pos: 2
+            grid_cell_column_pos: 0
+            text: "R0"
+        - switch:
+            id: ssr_button_1
+            <<: *switch_common
+            grid_cell_row_pos: 2
+            grid_cell_column_pos: 3
+            on_click:
+              - switch.toggle: ssr_1
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 2
+            grid_cell_column_pos: 5
+            text: "R1"
+        - switch:
+            id: ssr_button_2
+            <<: *switch_common
+            grid_cell_row_pos: 3
+            grid_cell_column_pos: 1
+            on_click:
+              - switch.toggle: ssr_2
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 3
+            grid_cell_column_pos: 0
+            text: "R2"
+        - switch:
+            id: ssr_button_3
+            <<: *switch_common
+            grid_cell_row_pos: 3
+            grid_cell_column_pos: 3
+            on_click:
+              - switch.toggle: ssr_3
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 3
+            grid_cell_column_pos: 5
+            text: "R3"
+        - switch:
+            id: ssr_button_4
+            <<: *switch_common
+            grid_cell_row_pos: 4
+            grid_cell_column_pos: 1
+            on_click:
+              - switch.toggle: ssr_4
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 4
+            grid_cell_column_pos: 0
+            text: "R4"
+        - switch:
+            id: ssr_button_5
+            <<: *switch_common
+            grid_cell_row_pos: 4
+            grid_cell_column_pos: 3
+            on_click:
+              - switch.toggle: ssr_5
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 4
+            grid_cell_column_pos: 5
+            text: "R5"
+        - switch:
+            id: ssr_button_6
+            <<: *switch_common
+            grid_cell_row_pos: 5
+            grid_cell_column_pos: 1
+            on_click:
+              - switch.toggle: ssr_6
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 5
+            grid_cell_column_pos: 0
+            text: "R6"
+        - switch:
+            id: ssr_button_7
+            <<: *switch_common
+            grid_cell_row_pos: 5
+            grid_cell_column_pos: 3
+            on_click:
+              - switch.toggle: ssr_7
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 5
+            grid_cell_column_pos: 5
+            text: "R7"
+
+font:
+  # http://materialdesignicons.com/cdn/7.4.47/
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: mdi_icons_40
+    size: 40
+    bpp: 8
+    glyphs: [
+      $mdi_bed,  # mdi-bed - bedroom icon
+      $mdi_brightness_6,  # mdi-brightness-6 - brightness slider icon
+      $mdi_bulkhead_light,  # mdi-bulkhead-light - bulkhead fixture
+      $mdi_ceiling_fan_light,  # mdi-ceiling-fan-light - ceiling fan with light
+      $mdi_ceiling_light,  # mdi-ceiling-light - ceiling fixture
+      $mdi_chevron_down,  # mdi-chevron-down - close/collapse button
+      $mdi_chevron_up,  # mdi-chevron-up - back/expand button
+      $mdi_circle_opacity,  # mdi-circle-opacity - saturation slider icon
+      $mdi_coach_lamp,  # mdi-coach-lamp - outdoor coach light
+      $mdi_eyedropper,  # mdi-eyedropper - spectrum mode toggle
+      $mdi_floor_lamp,  # mdi-floor-lamp - floor lamp
+      $mdi_grid,  # mdi-grid - grid mode toggle
+      $mdi_home,  # mdi-home - home/back navigation
+      $mdi_information_box,  # mdi-information-box - info screen
+      $mdi_lamp,  # mdi-lamp - table lamp
+      $mdi_led_strip,  # mdi-led-strip - LED strip light
+      $mdi_lightbulb,  # mdi-lightbulb - generic bulb icon
+      $mdi_string_lights,  # mdi-string-lights - decorative string lights
+      $mdi_track_light,  # mdi-track-light - track lighting
+      $mdi_white_balance_sunny,  # mdi-white-balance-sunny - color temp/sun icon
+    ]
+binary_sensor:
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_0
+    id: ha_switch_0_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_1
+    id: ha_switch_1_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_2
+    id: ha_switch_2_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_3
+    id: ha_switch_3_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_4
+    id: ha_switch_4_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_5
+    id: ha_switch_5_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_6
+    id: ha_switch_6_state
+    internal: true
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_ssr_relay_7
+    id: ha_switch_7_state
+    internal: true
+switch:
+  - platform: template
+    id: ssr_0
+    lambda: return id(ha_switch_0_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_0
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_0
+    on_state:
+      then:
+        - script.execute: sw0_state_sync
+  - platform: template
+    id: ssr_1
+    lambda: return id(ha_switch_1_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_1
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_1
+    on_state:
+      then:
+        - script.execute: sw1_state_sync
+  - platform: template
+    id: ssr_2
+    lambda: return id(ha_switch_2_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_2
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_2
+    on_state:
+      then:
+        - script.execute: sw2_state_sync
+  - platform: template
+    id: ssr_3
+    lambda: return id(ha_switch_3_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_3
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_3
+    on_state:
+      then:
+        - script.execute: sw3_state_sync
+  - platform: template
+    id: ssr_4
+    lambda: return id(ha_switch_4_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_4
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_4
+    on_state:
+      then:
+        - script.execute: sw4_state_sync
+  - platform: template
+    id: ssr_5
+    lambda: return id(ha_switch_5_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_5
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_5
+    on_state:
+      then:
+        - script.execute: sw5_state_sync  
+  - platform: template
+    id: ssr_6
+    lambda: return id(ha_switch_6_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_6
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_6
+    on_state:
+      then:
+        - script.execute: sw6_state_sync
+  - platform: template
+    id: ssr_7
+    lambda: return id(ha_switch_7_state).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: switch.turn_on
+          data:
+            entity_id: switch.gogo_h2_ssr1_7
+    turn_off_action:
+      - homeassistant.service:
+          service: switch.turn_off
+          data:
+            entity_id: switch.gogo_h2_ssr1_7
+    on_state:
+      then:
+        - script.execute: sw7_state_sync
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.herak_gogo_h2_sht20_temperature_0
+    id: t1_temp
+  - platform: homeassistant
+    entity_id: sensor.herak_gogo_h2_sht20_humidity_0
+    id: t1_hum
+  - platform: homeassistant
+    entity_id: sensor.herak_gogo_h2_sht20_temperature_1
+    id: t2_temp
+  - platform: homeassistant
+    entity_id: sensor.herak_gogo_h2_sht20_humidity_1
+    id: t2_hum
+
+# Template Button for Reset
+button:
+  - platform: template
+    id: reset_all_btn
+    on_press:
+      - homeassistant.service:
+          service: input_button.press
+          data:
+            entity_id: input_button.herak_gogo_h2_ssr_reset
+
+# Logic to sync HA back to the Screen
+interval:
+  - interval: 1s
+    then:
+      - lvgl.label.update:
+          id: temp_label
+          text: !lambda |-
+            return esphome::str_sprintf("T1: #ffa500 %.1f°C# H1: #00ffff %.0f%%#", id(t1_temp).state, id(t1_hum).state);
+      - lvgl.label.update:
+          id: temp_label_2
+          text: !lambda |-
+            return esphome::str_sprintf("T2: #ffa500 %.1f°C# H2: #00ffff %.0f%%#", id(t2_temp).state, id(t2_hum).state);
+
+          
+
