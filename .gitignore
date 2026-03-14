@@ -1,2 +1,2 @@
-/.esphome/
-secrets.yaml
+lib/.esphome/
+lib/esphome-modular-lvgl-buttons/*

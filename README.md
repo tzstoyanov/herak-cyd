@@ -16,10 +16,12 @@ git clone --recurse-submodules  https://github.com/tzstoyanov/herak-cyd.git
 - [ESPHome](https://esphome.io/guides/installing_esphome/)
 - [ESPHome integration](https://www.home-assistant.io/integrations/esphome/) on your Home Assistant instance
 ### Customize the code
-- Add your secrets to [secrets.yaml](secrets.yaml)
-- Create yaml file describing the logic of your screen. Look at [gogo-h2-cyd.yaml](gogo-h2-cyd.yaml) for an example.
+- Add your secrets to [lib/secrets.yaml](lib/secrets.yaml)
+- Create yaml file describing the logic of your screen. Look at [lib/gogo-h2-cyd.yaml](lib/gogo-h2-cyd.yaml) for an example.
 ### Compile and copy to device
-[Connect](https://esphome.io/guides/physical_device_connection) the LCD device and run `esphome run <your_custom>.yaml` to compile and upload the image.
+- [Connect](https://esphome.io/guides/physical_device_connection) the LCD device 
+- `cd lib`
+- run `esphome run <your_custom>.yaml` to compile and upload the image.
 
 ## Credits
 - [esphome-lvgl](https://github.com/RyanEwen/esphome-lvgl)
