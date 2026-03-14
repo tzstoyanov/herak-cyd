@@ -554,6 +554,13 @@ interval:
           id: temp_label_2
           text: !lambda |-
             return esphome::str_sprintf("T2: #ffa500 %.1f°C# H2: #00ffff %.0f%%#", id(t2_temp).state, id(t2_hum).state);
-
-          
-
+  - interval: 10s
+    then:
+      - script.execute: sw0_state_sync
+      - script.execute: sw1_state_sync
+      - script.execute: sw2_state_sync
+      - script.execute: sw3_state_sync
+      - script.execute: sw4_state_sync
+      - script.execute: sw5_state_sync
+      - script.execute: sw6_state_sync
+      - script.execute: sw7_state_sync
