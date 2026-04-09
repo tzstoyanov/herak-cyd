@@ -1,0 +1,338 @@
+---
+esphome:
+  name: "herak-gogo-h2-cyd"
+  friendly_name: "Herak Gogo H2 Thermostat"
+  comment: "Gogo H2 Thermostat 1"
+  on_boot:
+    - priority: -100
+      then: # Raise the threshold before a horizontal movement is classified as a swipe
+        - lambda: |-
+            lv_indev_t *indev = lv_indev_get_next(NULL);
+            while (indev) {
+              indev->driver->gesture_limit = 100;
+              indev = lv_indev_get_next(indev);
+            }
+    - priority: 400
+      then:
+        - script.execute: update_loading_page
+    - priority: 800
+      then: # therm1 enable switch
+        - script.execute: sw0_state_sync
+
+logger:
+  level: debug
+
+packages:
+  wifi: !include esphome-modular-lvgl-buttons/common/wifi.yaml
+  ota_screen: !include esphome-modular-lvgl-buttons/common/ota.yaml
+  colors: !include esphome-modular-lvgl-buttons/common/color.yaml
+  fonts: !include esphome-modular-lvgl-buttons/common/fonts.yaml
+  glyphs: !include esphome-modular-lvgl-buttons/common/mdi_glyph_substitutions.yaml
+  sensors: !include esphome-modular-lvgl-buttons/sensors/sensors_base.yaml
+  theme_style: !include esphome-modular-lvgl-buttons/common/theme_style.yaml
+  backlight: !include esphome-modular-lvgl-buttons/common/backlight_time.yaml
+  hardware: !include devices/JC3248W535.yaml
+  loading_screen: !include esphome-modular-lvgl-buttons/pages/loading.yaml
+  info_screen: !include esphome-modular-lvgl-buttons/pages/info.yaml
+
+substitutions:
+  icon_font: mdi_icons_40
+  text_font: nunito_20
+  digit_font: nunito_36
+  text_color: white
+  bg_color: black
+  button_on_color: "ep_orange"
+  button_off_color: "very_dark_gray"
+  icon_on_color: "yellow"
+  icon_off_color: "gray"
+  label_on_color: "white"
+  label_off_color: "gray"
+  button_text_color: "white"
+  screen_height: 480
+  screen_width: 320
+
+  display_daytime_brightness: "100%"
+  display_nighttime_brightness: "50%"
+  display_night_hour: "0"
+  display_night_minute: "0"
+  display_backlight_timeout_always_enabled: "false"
+  display_backlight_timeout_initial: "5"
+
+# -----------------------------------
+# Scripts
+# -----------------------------------
+script:
+  - id: time_update
+    then:
+      - logger.log: "Time synced (UI update skipped)"
+
+  # Sync the LVGL switch widget to the HA input_boolean state
+  - id: sw0_state_sync
+    then:
+      - lambda: |-
+          lv_obj_t *obj = id(therm1_enable_switch);
+          if (id(ha_therm1_enabled).state) {
+            lv_obj_add_state(obj, LV_STATE_CHECKED);
+          } else {
+            lv_obj_clear_state(obj, LV_STATE_CHECKED);
+          }
+          lv_obj_invalidate(obj);
+
+# -----------------------------------
+# LVGL UI
+# -----------------------------------
+lvgl:
+  theme:
+    slider:
+      bg_color: 0x1A2744
+      bg_grad_color: 0x0D1422
+      bg_grad_dir: VER
+      radius: 10
+      height: 20
+      border_width: 0
+      indicator:
+        bg_color: 0x1d5f96
+        bg_grad_color: 0x03324A
+        bg_grad_dir: HOR
+        radius: 10
+      knob:
+        bg_color: 0xFFFFFF
+        bg_grad_color: 0xC0C0C0
+        bg_grad_dir: "VER"
+        bg_opa: "COVER"
+        border_color: 0x888888
+        border_width: 1
+    switch:
+      bg_color: 0x707070
+      bg_grad_color: 0x303030
+      bg_grad_dir: "VER"
+      bg_opa: "COVER"
+      border_color: 0x444444
+      border_width: 1
+      checked:
+        bg_color: 0x1d5f96
+        bg_grad_color: 0x03324A
+        bg_grad_dir: "VER"
+        bg_opa: "COVER"
+        border_color: 0x3DB9FF
+        border_width: 2
+        shadow_width: 15
+        shadow_color: 0x1d5f96
+        shadow_opa: 80%
+      knob:
+        bg_color: 0xFFFFFF
+        bg_grad_color: 0xC0C0C0
+        bg_grad_dir: "VER"
+        bg_opa: "COVER"
+        border_color: 0x888888
+        border_width: 1
+
+  pages:
+    - id: main_page
+      layout: 8x6
+      styles: page_style
+      <<: !include esphome-modular-lvgl-buttons/widgets/swipe_navigation.yaml
+      widgets:
+        # -----------------------------------
+        # ROW 0 - "Thermostat 1" + enable switch
+        # -----------------------------------
+        - label:
+            <<: &label_common
+              grid_cell_y_align: center
+              grid_cell_row_span: 1
+              text_font: $text_font
+              text_color: $text_color
+              align: CENTER
+            grid_cell_row_pos: 0
+            grid_cell_column_pos: 0
+            grid_cell_column_span: 3
+            grid_cell_x_align: end
+            text: "Thermostat 1"
+        - switch:
+            id: therm1_enable_switch
+            grid_cell_x_align: stretch
+            grid_cell_y_align: stretch
+            grid_cell_row_span: 1
+            grid_cell_row_pos: 0
+            grid_cell_column_pos: 4
+            grid_cell_column_span: 2
+            on_click:
+              - switch.toggle: therm1_enable
+        # -----------------------------------
+        # ROW 1 - Current Valve state
+        # -----------------------------------
+        - label:
+            <<: *label_common
+            id: lbl_valve_cur
+            grid_cell_row_pos: 1
+            grid_cell_column_pos: 0
+            grid_cell_column_span: 6
+            grid_cell_x_align: center
+            text: "${mdi_heat_wave}"
+            text_font: $icon_font
+            text_color: 0xFFA500
+        # -----------------------------------
+        # ROW 2 - Current temperature
+        # -----------------------------------
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 2
+            grid_cell_column_pos: 0
+            grid_cell_column_span: 3
+            grid_cell_x_align: start
+            text: "Current temperature"
+        - label:
+            <<: *label_common
+            id: lbl_temp_cur
+            grid_cell_row_pos: 2
+            grid_cell_column_pos: 3
+            grid_cell_column_span: 3
+            grid_cell_x_align: end
+            text: "--.-°C"
+            text_font: $digit_font
+            recolor: true
+        # -----------------------------------
+        # ROW 3 - Setpoint label + live value
+        # -----------------------------------
+        - label:
+            <<: *label_common
+            grid_cell_row_pos: 3
+            grid_cell_column_pos: 0
+            grid_cell_column_span: 3
+            grid_cell_x_align: start
+            text: "Setpoint"
+        - label:
+            <<: *label_common
+            id: lbl_setpoint_val
+            grid_cell_row_pos: 3
+            grid_cell_column_pos: 3
+            grid_cell_column_span: 3
+            grid_cell_x_align: end
+            text: "--.-°C"
+            text_font: $digit_font
+            recolor: true
+        # -----------------------------------
+        # ROW 4 - Temperature setpoint slider
+        # -----------------------------------
+        - slider:
+            id: therm1_setpoint_slider
+            grid_cell_x_align: stretch
+            grid_cell_y_align: stretch
+            grid_cell_row_span: 1
+            grid_cell_row_pos: 4
+            grid_cell_column_pos: 0
+            grid_cell_column_span: 6
+            min_value: 5    # 5.0 °C
+            max_value: 35   # 35.0 °C
+            value: 20       # 20.0 °C default
+            adv_hittest: false
+            on_value:
+              then:
+                - lvgl.label.update:
+                    id: lbl_setpoint_val
+                    text: !lambda |-
+                      return esphome::str_sprintf("#ff4444 %.1f°C#", x);
+                - homeassistant.service:
+                    service: input_number.set_value
+                    data:
+                      entity_id: input_number.gogo_h2_therm1_t
+                      value: !lambda 'return x;'
+
+# ---------------------------------------------------------
+# Font  -  only glyphs actually used in this view
+# ---------------------------------------------------------
+font:
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: mdi_icons_40
+    size: 40
+    bpp: 8
+    glyphs: [
+      $mdi_heat_wave,          # valve
+    ]
+
+# ---------------------------------------------------------
+# HA binary sensors  <->  ESPHome
+# ---------------------------------------------------------
+binary_sensor:
+  # input_boolean - thermostat enable
+  - platform: homeassistant
+    entity_id: input_boolean.gogo_h2_therm1_e
+    id: ha_therm1_enabled
+    internal: true
+
+  # valve open indicator
+  - platform: homeassistant
+    entity_id: binary_sensor.herak_gogo_h2_thermostat_valve_0
+    id: ha_valve_open
+    internal: true
+
+# ---------------------------------------------------------
+# Template switch  -  bridges LVGL <-> HA input_boolean
+# ---------------------------------------------------------
+switch:
+  - platform: template
+    id: therm1_enable
+    lambda: return id(ha_therm1_enabled).state;
+    turn_on_action:
+      - homeassistant.service:
+          service: input_boolean.turn_on
+          data:
+            entity_id: input_boolean.gogo_h2_therm1_e
+    turn_off_action:
+      - homeassistant.service:
+          service: input_boolean.turn_off
+          data:
+            entity_id: input_boolean.gogo_h2_therm1_e
+    on_state:
+      then:
+        - script.execute: sw0_state_sync
+
+# ---------------------------------------------------------
+# HA sensors  <->  ESPHome
+# ---------------------------------------------------------
+sensor:
+  # Read-only temperature from the thermostat device
+  - platform: homeassistant
+    entity_id: sensor.herak_gogo_h2_thermostat_temperature_0
+    id: ha_temp_cur
+
+  # Writable setpoint – sync slider when HA value changes externally
+  - platform: homeassistant
+    entity_id: input_number.gogo_h2_therm1_t
+    id: ha_setpoint
+    on_value:
+      then:
+        - lambda: |-
+            lv_slider_set_value(id(therm1_setpoint_slider), (int)(x), LV_ANIM_OFF);
+            lv_obj_invalidate(id(therm1_setpoint_slider));
+
+# ---------------------------------------------------------
+# Intervals
+# ---------------------------------------------------------
+interval:
+  # 1 s - refresh all labels from sensor state
+  - interval: 1s
+    then:
+      # Current temperature
+      - lvgl.label.update:
+          id: lbl_temp_cur
+          text: !lambda |-
+            return esphome::str_sprintf("#ffa500 %.1f°C#", id(ha_temp_cur).state);
+      # Valve state
+      - lvgl.label.update:
+          id: lbl_valve_cur
+          text_color: !lambda |-
+            if (id(ha_valve_open).state)
+              return lv_color_hex(0xFF6600); // Active Orange
+            else
+              return lv_color_hex(0xA9A9A9); // Inactive Grey
+      # Setpoint
+      - lvgl.label.update:
+          id: lbl_setpoint_val
+          text: !lambda |-
+            return esphome::str_sprintf("#ffa500 %.1f°C#", id(ha_setpoint).state);
+
+  # 10 s - periodic re-sync of the widgets state 
+  - interval: 10s
+    then:
+      - script.execute: sw0_state_sync
