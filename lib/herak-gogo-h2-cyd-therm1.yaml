@@ -305,7 +305,16 @@ sensor:
         - lambda: |-
             lv_slider_set_value(id(therm1_setpoint_slider), (int)(x), LV_ANIM_OFF);
             lv_obj_invalidate(id(therm1_setpoint_slider));
-
+  - platform: dallas_temp
+    id: local_temp_cur
+    address: 0x210000009d41cb28
+    name: "CYD1RoomT"
+    update_interval: 2s
+    filters:
+      - median:
+          window_size: 5
+          send_every: 1
+          send_first_at: 1
 # ---------------------------------------------------------
 # Intervals
 # ---------------------------------------------------------
@@ -317,7 +326,7 @@ interval:
       - lvgl.label.update:
           id: lbl_temp_cur
           text: !lambda |-
-            return esphome::str_sprintf("#ffa500 %.1f°C#", id(ha_temp_cur).state);
+            return esphome::str_sprintf("#ffa500 %.1f°C#", id(local_temp_cur).state);
       # Valve state
       - lvgl.label.update:
           id: lbl_valve_cur
@@ -336,3 +345,7 @@ interval:
   - interval: 10s
     then:
       - script.execute: sw0_state_sync
+
+one_wire:
+  - platform: gpio
+    pin: GPIO17
